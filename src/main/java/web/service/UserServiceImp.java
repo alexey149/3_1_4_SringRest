@@ -39,11 +39,20 @@ public class UserServiceImp implements UserService, UserDetailsService {
     @Override
     @Transactional
     public void save(User user) {
-        // Шифруем пароль перед сохранением, если он не пустой
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // Проверяем, существует ли пользователь с таким ID
+        User existingUser = (user.getId() != 0) ? getUserById(user.getId()) : null;
+
+        // Если пользователь существует и пароль не изменен (т.е. это тот же самый хэш)
+        if (existingUser != null && existingUser.getPassword().equals(user.getPassword())) {
+            // Оставляем пароль как есть, без перехэширования
+            userDao.save(user);
+        } else {
+            // Шифруем пароль перед сохранением, если он не пустой
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
+            userDao.save(user);
         }
-        userDao.save(user);
     }
 
     @Override

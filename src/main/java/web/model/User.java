@@ -30,7 +30,7 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String username;
 
-    @NotBlank(message = "Password cannot be empty")
+    // Удалена аннотация @NotBlank
     private String password;
 
     // Убираем каскадные операции

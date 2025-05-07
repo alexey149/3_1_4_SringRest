@@ -1,10 +1,5 @@
 $(document).ready(function() {
-    // Загружаем таблицу пользователей при загрузке страницы
-    if ($("#users-table").length) {
-        loadUsers();
-    }
-
-    // Загружаем информацию о текущем пользователе
+    // Загружаем информацию о текущем пользователе на странице пользователя
     if ($("#user-info").length) {
         loadCurrentUser();
     }
@@ -38,7 +33,7 @@ $(document).ready(function() {
     $(document).on('click', '.delete-button', function() {
         const userId = $(this).data('id');
         if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
-            deleteUser(userId);
+            window.location.href = '/admin/deleteUser?userId=' + userId;
         }
     });
 });
@@ -57,7 +52,7 @@ function loadUsers() {
                     if (user.roles && user.roles.length > 0) {
                         user.roles.forEach(function(role) {
                             if (role && role.name) {
-                                rolesBadges += `<span class="badge badge-pill badge-primary">${role.name}</span> `;
+                                rolesBadges += `<span class="badge badge-pill badge-primary">${role.name.replace('ROLE_', '')}</span> `;
                             }
                         });
                     }
@@ -121,11 +116,11 @@ function loadCurrentUser() {
                         if (role && role.name) {
                             // Добавляем бейджи ролей
                             $('#user-roles-badges').append(
-                                `<div class="badge badge-pill badge-primary m-1">${role.name}</div>`
+                                `<div class="badge badge-pill badge-primary m-1">${role.name.replace('ROLE_', '')}</div>`
                             );
 
                             // Формируем текстовый список ролей
-                            rolesList += role.name;
+                            rolesList += role.name.replace('ROLE_', '');
                             if (index < user.roles.length - 1) {
                                 rolesList += ', ';
                             }
@@ -175,7 +170,7 @@ function loadRoles() {
                         rolesHtml += `
                         <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input role-checkbox" id="role_${role.id}" value="${role.name}">
-                            <label class="custom-control-label" for="role_${role.id}">${role.name}</label>
+                            <label class="custom-control-label" for="role_${role.id}">${role.name.replace('ROLE_', '')}</label>
                         </div>`;
                     }
                 });
@@ -298,7 +293,7 @@ function saveUser() {
     // Формируем параметры запроса с ролями
     const roleParam = selectedRoles.length > 0 ? selectedRoles.join(',') : '';
 
-    // Отправляем запрос
+    // Отправляем запрос через REST API
     $.ajax({
         url: '/api/users' + (roleParam ? '?roles=' + roleParam : ''),
         type: method,
@@ -341,17 +336,8 @@ function deleteUser(userId) {
         return;
     }
 
-    $.ajax({
-        url: '/api/users/' + userId,
-        type: 'DELETE',
-        success: function() {
-            showAlert('success', 'Пользователь успешно удален');
-            loadUsers();
-        },
-        error: function(xhr, status, error) {
-            showAlert('error', 'Ошибка удаления пользователя: ' + (error || 'Неизвестная ошибка'));
-        }
-    });
+    // Перенаправляем на серверный метод для удаления
+    window.location.href = '/admin/deleteUser?userId=' + userId;
 }
 
 // Очистка формы пользователя

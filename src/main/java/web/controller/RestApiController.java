@@ -28,6 +28,7 @@ public class RestApiController {
         this.roleService = roleService;
     }
 
+    // REST API эндпоинты
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
